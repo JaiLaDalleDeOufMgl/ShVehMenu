@@ -1,17 +1,3 @@
---[[ 
-    Beaucoup de correction faite, tu as encore beaucoup à apprendre.
-    Prend bien en compte les corrections car tu fais beaucoup de répétition.
-
-    Tu n'as pas encore bien saisie le fonctionnement de la programattion. Un conseil : met toi à la place de la machine
-    L'indentation et mettre des commantaire c'est aussi important !! 
-    
-
-    /!\ La correction n'est pas été tester mais les prinipes sont là.
-    Compare ton code avec la correction.
-
-    Bon courage ! :)
- ]]
-
 Vehicle = {}
 
 local open = false 
