@@ -1,102 +1,110 @@
+--[[ 
+    Beaucoup de correction faite, tu as encore beaucoup à apprendre.
+    Prend bien en compte les corrections car tu fais beaucoup de répétition.
+
+    Tu n'as pas encore bien saisie le fonctionnement de la programattion. Un conseil : met toi à la place de la machine
+    L'indentation et mettre des commantaire c'est aussi important !! 
+    
+
+    /!\ La correction n'est pas été tester mais les prinipes sont là.
+    Compare ton code avec la correction.
+
+    Bon courage ! :)
+ ]]
+
 Vehicle = {}
 
 local open = false 
+
 Vehicle.MenuVehicle = RageUI.CreateMenu("Gestion Véhicule", "INTERACTION")
-local limit,door,hood,chest,limitlist,moteurengine,porte = "~r~Aucun",1,1,1,1,1,1
-MenuIsOpen = function() 
-    if open then open = false RageUI.Visible(Vehicle.MenuVehicle, false) return else open = true RageUI.Visible(Vehicle.MenuVehicle, true)
+
+local vehStatut = {
+    limit = 30,
+    door = true,
+    hood = true,
+    chest = true,
+    limitlist = {30, 50, 80, 120, 0},
+    moteurengine = true,
+    porte = true
+}
+
+local function MenuIsOpen()
+
+    if open then
+
+        open = not open
+
+        RageUI.Visible(Vehicle.MenuVehicle, open)
+
+        return
+
+    else
+        open = not open
+
+        RageUI.Visible(Vehicle.MenuVehicle, open)
+
         Citizen.CreateThread(function()
+
             while open do 
+
+                local veh = GetVehiclePedIsIn(PlayerPedId(), false)
+
                 RageUI.IsVisible(Vehicle.MenuVehicle, function()
+
                     RageUI.Separator("→→ ~y~Gestion véhicule~s~ ←←")
-                    RageUI.Separator("Limitateur Actuelle : "..limit)
-                    RageUI.List("Limitateur",{"30","50","80","120","Aucun"},limitlist,nil,{},true,{
+
+                    RageUI.Separator("Limiteur Actuelle :~g~ " ..  vehStatut.limit)
+
+                    RageUI.List("Limiteur",vehStatut.limitlist , vehStatut.limit, nil, {}, true, {
+
                         onListChange = function(Index)
-                            limitlist = Index
+                            vehStatut.limit = vehStatut.limitlist[Index]
                         end,
+
                         onSelected = function(Index)
-                            if Index == 1 then
-                                SetVehicleMaxSpeed(GetVehiclePedIsIn(PlayerPedId(), false), 8.1)
-                                limit = "~g~30"
-                            elseif Index == 2 then
-                                SetVehicleMaxSpeed(GetVehiclePedIsIn(PlayerPedId(), false), 13.7)
-                                limit = "~g~50"
-                            elseif Index == 3 then
-                                SetVehicleMaxSpeed(GetVehiclePedIsIn(PlayerPedId(), false), 22.0)
-                                limit = "~g~80"
-                            elseif Index == 4 then
-                                SetVehicleMaxSpeed(GetVehiclePedIsIn(PlayerPedId(), false), 33.0)
-                                limit = "~g~120"
-                            elseif Index == 5 then
-                                SetVehicleMaxSpeed(GetVehiclePedIsIn(PlayerPedId(), false), 0.0)
-                                limit = "~r~Aucun"
-                            end
+                            SetVehicleMaxSpeed(veh, vehStatut.limitlist[Index] / 3.6 or 0)
                         end
                     })
-                    RageUI.List("Moteur",{"Eteindre","Allumé"},moteurengine,nil,{},true,{
-                        onListChange = function(Index)
-                            moteurengine = Index
-                        end,
+
+
+                    RageUI.Checkbox("Moteur", "Eteindre/Allumer", vehStatut.moteurengine, nil, {
+
                         onSelected = function(Index)
-                            if Index == 1 then
-                                SetVehicleEngineOn(GetVehiclePedIsIn(PlayerPedId()), false, false, true)
-                            elseif Index == 2 then
-                                SetVehicleEngineOn(GetVehiclePedIsIn(PlayerPedId()), true, false, true)
+
+                            vehStatut.moteurengine = not vehStatut.moteurengine
+                            SetVehicleEngineOn(veh, vehStatut.moteurengine, false, true)
+
+                        end
+
+                    })
+
+                    RageUI.List("Ouvrir/Fermer Porte", {"Avant gauche", "Avant droite", "Arrière gauche", "Arrière droite", "Capot", "Coffre"} ,vehStatut.porte ,nil, {}, true, {
+                        onListChange = function(Index)
+                            vehStatut.porte = Index
+                        end,
+
+                        onSelected = function(Index)
+                            if IsVehicleDoorFullyOpen(veh, Index - 1) then
+                                SetVehicleDoorShut(veh, Index -1, false, false)
+                            else
+                                SetVehicleDoorOpen(veh, Index - 1, false, false)
                             end
+                            
                         end
                     })
-                    RageUI.List("Ouvrir Porte",{"Avant gauche","Avant droite","Arrière gauche","Arrière droite","Capot","Coffre"},porte,nil,{},true,{
-                        onListChange = function(Index)
-                            porte = Index
-                        end,
-                        onSelected = function(Index)
-                            if Index == 1 then
-                                SetVehicleDoorOpen(GetVehiclePedIsIn(PlayerPedId()), 0, false, false)
-                            elseif Index == 2 then
-                                SetVehicleDoorOpen(GetVehiclePedIsIn(PlayerPedId()), 1, false, false)
-                            elseif Index == 3 then
-                                SetVehicleDoorOpen(GetVehiclePedIsIn(PlayerPedId()), 2, false, false)
-                            elseif Index == 4 then
-                                SetVehicleDoorOpen(GetVehiclePedIsIn(PlayerPedId()), 3, false, false)
-                            elseif Index == 5 then
-                                SetVehicleDoorOpen(GetVehiclePedIsIn(PlayerPedId()), 4, false, false)
-                            elseif Index == 6 then
-                                SetVehicleDoorOpen(GetVehiclePedIsIn(PlayerPedId()), 5, false, false)
-                            end
-                        end
-                    })  
-                    RageUI.List("Fermer Porte",{"Avant gauche","Avant droite","Arrière gauche","Arrière droite","Capot","Coffre"},porte,nil,{},true,{
-                        onListChange = function(Index)
-                            porte = Index
-                        end,
-                        onSelected = function(Index)
-                            if Index == 1 then
-                                SetVehicleDoorShut(GetVehiclePedIsIn(PlayerPedId()), 0, false, false)
-                            elseif Index == 2 then
-                                SetVehicleDoorShut(GetVehiclePedIsIn(PlayerPedId()), 1, false, false)
-                            elseif Index == 3 then
-                                SetVehicleDoorShut(GetVehiclePedIsIn(PlayerPedId()), 2, false, false)
-                            elseif Index == 4 then
-                                SetVehicleDoorShut(GetVehiclePedIsIn(PlayerPedId()), 3, false, false)
-                            elseif Index == 5 then
-                                SetVehicleDoorShut(GetVehiclePedIsIn(PlayerPedId()), 4, false, false)
-                            elseif Index == 6 then
-                                SetVehicleDoorShut(GetVehiclePedIsIn(PlayerPedId()), 5, false, false)
-                            end
-                        end
-                    })  
                 end)
-            Wait(0)
+
+                Wait(0)
             end
         end)
     end
 end
 
 Keys.Register("G", "G", "VehMenu", function()
-    local ped = GetPlayerPed(-1)
-    if IsPedInAnyVehicle(ped) then
+
+    if IsPedInAnyVehicle(PlayerPedId()) then 
         MenuIsOpen()
     else
-        print('tu nes pas dans un vehicule')
+        print('Tu n\'es pas dans un véhicule.')
     end
 end)
